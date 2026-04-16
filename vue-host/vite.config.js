@@ -11,6 +11,8 @@ export default defineConfig({
       remotes: {
         react_login: 'http://localhost:5001/assets/remoteEntry.js',
         react_signup: 'http://localhost:5002/assets/remoteEntry.js',
+        react_profile: 'http://localhost:5003/assets/remoteEntry.js',
+        react_dashboard: 'http://localhost:5004/assets/remoteEntry.js',
       },
       shared: ['vue'],
     }),

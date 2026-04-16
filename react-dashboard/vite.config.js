@@ -6,10 +6,10 @@ export default defineConfig({
   plugins: [
     react(),
     federation({
-      name: 'react_profile',
+      name: 'react_dashboard',
       filename: 'remoteEntry.js',
       exposes: {
-        './Profile': './src/Profile.jsx',
+        './Dashboard': './src/Dashboard.jsx',
       },
       shared: ['react', 'react-dom']
     })
@@ -17,8 +17,10 @@ export default defineConfig({
   build: {
     target: 'esnext'
   },
+  server: { port: 5004, cors: true },
   preview: {
-    port: 5003,
-    strictPort: true
+    port: 5004,
+    strictPort: true,
+    cors: true
   }
 })

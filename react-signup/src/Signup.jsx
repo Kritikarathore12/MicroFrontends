@@ -1,7 +1,7 @@
 function Signup() {
   return (
     <div>
-      <h2>React Signup Micro Frontend</h2>
+      <h2>Signup page</h2>
 
       <input type="text" placeholder="Enter Name" />
       <br />

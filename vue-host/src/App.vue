@@ -1,6 +1,8 @@
 <script setup>
 import LoginWrapper from './components/LoginWrapper.vue'
 import SignupWrapper from './components/SignupWrapper.vue'
+import ProfileWrapper from './components/ProfileWrapper.vue'
+import DashboardWrapper from './components/DashboardWrapper.vue'
 </script>
 
 <template>
@@ -19,5 +21,11 @@ import SignupWrapper from './components/SignupWrapper.vue'
     <br /><br />
 
     <SignupWrapper />
+    <br /><br />
+
+    <ProfileWrapper />
+    <br /><br />
+
+    <DashboardWrapper />
   </div>
 </template>
