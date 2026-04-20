@@ -11,7 +11,10 @@ export default defineConfig({
       exposes: {
         './Dashboard': './src/Dashboard.jsx',
       },
-      shared: ['react', 'react-dom']
+      shared: {
+        'react': { singleton: true, requiredVersion: false },
+        'react-dom': { singleton: true, requiredVersion: false },
+      }
     })
   ],
   build: {

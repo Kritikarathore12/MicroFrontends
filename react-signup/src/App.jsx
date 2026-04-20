@@ -1,18 +1,10 @@
+import Signup from './Signup'
+
 function App() {
   return (
-    <div>
-      <h1>Signup Page</h1>
-
-      <input type="text" placeholder="Enter Name" />
-      <br /><br />
-
-      <input type="email" placeholder="Enter Email" />
-      <br /><br />
-
-      <input type="password" placeholder="Enter Password" />
-      <br /><br />
-
-      <button>Signup</button>
+    <div style={{ padding: '40px', background: '#0b1020', minHeight: '100vh', fontFamily: 'system-ui, sans-serif' }}>
+      <h1 style={{ color: 'white', textAlign: 'center', marginBottom: '30px' }}>Standalone Signup Preview</h1>
+      <Signup />
     </div>
   )
 }

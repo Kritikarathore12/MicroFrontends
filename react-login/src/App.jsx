@@ -1,15 +1,10 @@
+import Login from './Login'
+
 function App() {
   return (
-    <div>
-      <h1>Login Page</h1>
-
-      <input type="email" placeholder="Enter Email" />
-      <br /><br />
-
-      <input type="password" placeholder="Enter Password" />
-      <br /><br />
-
-      <button>Login</button>
+    <div style={{ padding: '40px', background: '#0b1020', minHeight: '100vh' }}>
+      <h1 style={{ color: 'white', textAlign: 'center', marginBottom: '30px' }}>Standalone Login Preview</h1>
+      <Login />
     </div>
   )
 }

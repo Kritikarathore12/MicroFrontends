@@ -11,7 +11,10 @@ export default defineConfig({
       exposes: {
         './Signup': './src/SignupWrapper.jsx',
       },
-      shared: ['react', 'react-dom'],
+      shared: {
+        'react': { singleton: true, requiredVersion: false },
+        'react-dom': { singleton: true, requiredVersion: false },
+      },
     }),
   ],
   build: {

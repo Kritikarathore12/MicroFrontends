@@ -1,9 +1,9 @@
 import LoginForm from "./components/loginForm"
 
-function Login() {
+function Login({ onLogin }) {
   return (
     <div>
-      <LoginForm />
+      <LoginForm onLogin={onLogin} />
     </div>
   )
 }

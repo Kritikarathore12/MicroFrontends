@@ -11,14 +11,19 @@ export default defineConfig({
       exposes: {
         './Profile': './src/Profile.jsx',
       },
-      shared: ['react', 'react-dom']
+      shared: {
+        'react': { singleton: true, requiredVersion: false },
+        'react-dom': { singleton: true, requiredVersion: false },
+      }
     })
   ],
   build: {
     target: 'esnext'
   },
+  server: { port: 5003, cors: true },
   preview: {
     port: 5003,
-    strictPort: true
+    strictPort: true,
+    cors: true
   }
 })

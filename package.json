@@ -1,4 +1,14 @@
 {
+  "name": "microfrontends-root",
+  "private": true,
+  "scripts": {
+    "build:all": "npm --prefix react-login run build && npm --prefix react-signup run build && npm --prefix react-profile run build && npm --prefix react-dashboard run build",
+    "start:login": "npm --prefix react-login run preview",
+    "start:signup": "npm --prefix react-signup run preview",
+    "start:profile": "npm --prefix react-profile run preview",
+    "start:dashboard": "npm --prefix react-dashboard run preview",
+    "start:host": "npm --prefix vue-host run dev"
+  },
   "dependencies": {
     "@originjs/vite-plugin-federation": "^1.4.1"
   }

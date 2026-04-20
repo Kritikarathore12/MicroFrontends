@@ -1,6 +1,22 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-export default function Dashboard() {
+export default function Dashboard({ token }) {
+    const [vueMessage, setVueMessage] = useState('');
+
+    useEffect(() => {
+        const handleVueMsg = (e) => setVueMessage(e.detail);
+        window.addEventListener('HostToDashboard', handleVueMsg);
+        return () => window.removeEventListener('HostToDashboard', handleVueMsg);
+    }, []);
+
+    const [inputMsg, setInputMsg] = useState('');
+
+    const sendMessageToVue = () => {
+        if (!inputMsg) return;
+        window.dispatchEvent(new CustomEvent('DashboardToHost', { detail: inputMsg }));
+        setInputMsg('');
+    };
+
     return (
         <div style={{
             padding: '40px',
@@ -24,6 +40,40 @@ export default function Dashboard() {
             }}>
                 Overview Dashboard
             </h2>
+            
+            {token && (
+                <div style={{ padding: '12px', background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)', color: '#4ade80', borderRadius: '8px', marginBottom: '20px', wordBreak: 'break-all' }}>
+                    <strong>✅ Authenticated via React Login!</strong><br />
+                    Received JWT Token from Vue Host: {token}
+                </div>
+            )}
+            
+            {/* New Bi-Directional Comms Block */}
+            <div style={{ padding: '24px', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '16px', marginBottom: '32px' }}>
+                <h3 style={{ margin: '0 0 12px 0', color: '#60a5fa', fontSize: '18px' }}>Bi-Directional Communication Event Bus</h3>
+                <p style={{ margin: '0 0 16px 0', color: '#cbd5e1', fontSize: '15px' }}>
+                    Vue Host says: <strong style={{ color: 'white', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px' }}>{vueMessage || "No message received yet..."}</strong>
+                </p>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <input 
+                        type="text" 
+                        value={inputMsg} 
+                        onChange={e => setInputMsg(e.target.value)} 
+                        placeholder="Type a custom message for Vue Host..." 
+                        style={{ flex: 1, padding: '10px 15px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(0,0,0,0.2)', color: 'white', fontSize: '14px', outline: 'none' }}
+                        onKeyDown={e => e.key === 'Enter' && sendMessageToVue()}
+                    />
+                    <button 
+                        onClick={sendMessageToVue}
+                        style={{ padding: '10px 20px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '14px', transition: 'background 0.2s', whiteSpace: 'nowrap' }}
+                        onMouseOver={(e) => e.target.style.background = '#2563eb'}
+                        onMouseOut={(e) => e.target.style.background = '#3b82f6'}
+                    >
+                        Send to Vue Host
+                    </button>
+                </div>
+            </div>
+
             <p style={{ color: '#94a3b8', fontSize: '16px', marginBottom: '32px' }}>
                 Real-time metrics rendered natively from the React micro-frontend.
             </p>
