@@ -1,0 +1,10 @@
+{
+  "remotes": {
+    "react_login": "http://localhost:5001",
+    "react_signup": "http://localhost:5002",
+    "react_profile": "http://localhost:5003",
+    "react_dashboard": "http://localhost:5004"
+  },
+  "version": "1.0.0",
+  "environment": "development"
+}

@@ -1,111 +1,93 @@
-import React, { useState } from 'react';
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
-
-// We now securely pull the Client ID from the local .env file
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+import React, { useState, useEffect } from 'react'
+import { bridge } from '../utils/bridge-client'
 
 function LoginForm({ onLogin }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
+  const [email, setEmail]       = useState('')
+  const [password, setPassword] = useState('')
+  const [errorMsg, setErrorMsg] = useState('')
+  const [loading, setLoading]   = useState(false)
 
-  const handleStandardLogin = (e) => {
-    e.preventDefault();
-    setErrorMsg('');
+  useEffect(() => {
+    bridge.init()
+  }, [])
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setErrorMsg('')
+
     if (!email || !password) {
-      setErrorMsg("Please fill details");
-      return;
+      setErrorMsg('Please fill in all fields.')
+      return
     }
 
-    // Check credentials against local DB
-    const usersDB = JSON.parse(localStorage.getItem('usersDB') || '[]');
-    const user = usersDB.find(u => u.email === email);
+    setLoading(true)
+    const usersStr = await bridge.getItem('usersDB')
+    const users    = JSON.parse(usersStr || '[]')
+    const user     = users.find(u => u.email === email)
+    setLoading(false)
 
     if (!user) {
-      setErrorMsg("User not found. Please sign up.");
-      return;
+      setErrorMsg('No account found. Please sign up first.')
+      return
     }
-    
     if (user.password !== password) {
-      setErrorMsg("Incorrect password. Please try again.");
-      return;
+      setErrorMsg('Incorrect password.')
+      return
     }
 
-    // Success! Log them in
-    const fakeJwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy." + Date.now();
-    localStorage.setItem('jwt_token', fakeJwtToken);
-    if (onLogin) onLogin(fakeJwtToken);
+    const token = 'jwt.' + btoa(JSON.stringify({ email: user.email, name: user.name })) + '.' + Date.now()
+    await bridge.setItem('jwt_token', token)
+    if (onLogin) onLogin(token)
   }
 
-  // Handle successful Google Login
-  const handleGoogleSuccess = (credentialResponse) => {
-    // The "credential" returned by Google is an extremely secure JWT token identifying the user
-    const googleJwtToken = credentialResponse.credential;
-
-    // Save Google's Real JWT to our local storage
-    localStorage.setItem('jwt_token', googleJwtToken);
-
-    // Tell Vue to unlock the dashboard using Google's JWT!
-    if (onLogin) {
-      onLogin(googleJwtToken);
-    }
-  };
+  const inputStyle = {
+    width: '100%', padding: '12px', borderRadius: '8px',
+    border: '1px solid #334155', background: '#0f172a',
+    color: 'white', fontSize: '14px', boxSizing: 'border-box',
+    outline: 'none', marginBottom: '16px',
+  }
+  const labelStyle = {
+    color: '#94a3b8', fontSize: '13px', fontWeight: '500',
+    display: 'block', marginBottom: '6px',
+  }
 
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <div style={{ background: 'rgba(255,255,255,0.05)', padding: '30px', borderRadius: '10px', maxWidth: '400px', margin: '0 auto', fontFamily: 'system-ui, sans-serif' }}>
-        <h2 style={{ textAlign: 'center', margin: '0 0 20px 0', color: 'white' }}>Welcome Back</h2>
-        
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0b1020', fontFamily: 'system-ui, sans-serif' }}>
+      <div style={{ background: 'rgba(255,255,255,0.05)', padding: '40px', borderRadius: '16px', maxWidth: '400px', width: '100%', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+        <h2 style={{ textAlign: 'center', margin: '0 0 8px', color: 'white', fontSize: '28px', fontWeight: '700' }}>Welcome Back</h2>
+        <p  style={{ textAlign: 'center', color: '#64748b', margin: '0 0 30px', fontSize: '14px' }}>Sign in to your account</p>
+
         {errorMsg && (
-          <div style={{ padding: '10px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#fca5a5', borderRadius: '6px', textAlign: 'center', marginBottom: '20px', fontSize: '14px' }}>
+          <div style={{ padding: '12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5', borderRadius: '8px', marginBottom: '20px', fontSize: '14px', textAlign: 'center' }}>
             {errorMsg}
           </div>
         )}
 
-        {/* Google Authentication Component */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => {
-              console.error('Login Failed');
-              alert("Google Authentication Failed");
-            }}
-            theme="filled_black"
-            size="large"
-            width="340"
-          />
-        </div>
+        <form onSubmit={handleSubmit}>
+          <label style={labelStyle}>Email</label>
+          <input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} />
 
-        {/* Divider */}
-        <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0', color: '#64748b' }}>
-          <hr style={{ flex: 1, borderColor: 'rgba(255,255,255,0.1)' }} />
-          <span style={{ padding: '0 10px', fontSize: '12px', fontWeight: '500' }}>OR CONTINUE WITH EMAIL</span>
-          <hr style={{ flex: 1, borderColor: 'rgba(255,255,255,0.1)' }} />
-        </div>
+          <label style={labelStyle}>Password</label>
+          <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} style={{ ...inputStyle, marginBottom: '24px' }} />
 
-        {/* Standard Auth Form */}
-        <form onSubmit={handleStandardLogin}>
-          <input
-            type="email"
-            placeholder="Enter Email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            style={{ width: '100%', padding: '12px', marginBottom: '15px', borderRadius: '6px', border: '1px solid #334155', background: '#0f172a', color: 'white', boxSizing: 'border-box' }}
-          />
-          <input
-            type="password"
-            placeholder="Enter Password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            style={{ width: '100%', padding: '12px', marginBottom: '15px', borderRadius: '6px', border: '1px solid #334155', background: '#0f172a', color: 'white', boxSizing: 'border-box' }}
-          />
-          <button type="submit" style={{ width: '100%', padding: '12px', background: '#3b82f6', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '6px', fontWeight: '600', fontSize: '15px', transition: 'background 0.2s' }}>
-            Mock Login
+          <button
+            type="submit"
+            disabled={loading}
+            style={{ width: '100%', padding: '13px', background: loading ? '#1e3a5f' : 'linear-gradient(135deg, #3b82f6, #2563eb)', color: 'white', border: 'none', cursor: loading ? 'wait' : 'pointer', borderRadius: '8px', fontWeight: '600', fontSize: '15px', transition: 'opacity 0.2s' }}
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+
+        <p style={{ textAlign: 'center', color: '#64748b', marginTop: '20px', fontSize: '13px' }}>
+          Don't have an account?{' '}
+          <span style={{ color: '#60a5fa', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => bridge.broadcast('NAVIGATE', '/signup')}>
+            Sign up
+          </span>
+        </p>
       </div>
-    </GoogleOAuthProvider>
+    </div>
   )
 }
 
-export default LoginForm;
+export default LoginForm

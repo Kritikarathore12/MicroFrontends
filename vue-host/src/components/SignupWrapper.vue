@@ -1,5 +1,22 @@
 <template>
-  <div ref="container"></div>
+  <div style="width: 100%; min-height: 450px; position: relative; display: flex; justify-content: center; align-items: center;">
+    <!-- Skeleton Loader -->
+    <div v-if="loading" class="signup-skeleton">
+      <div class="skeleton-title"></div>
+      <div class="skeleton-input" v-for="i in 3" :key="i"></div>
+      <div class="skeleton-btn"></div>
+    </div>
+
+    <!-- Error State -->
+    <div v-if="error" class="error-block-compact">
+      <div style="font-size: 32px;">🔌</div>
+      <p>Signup Service Offline</p>
+      <button @click="retryLoad" class="retry-btn-small">Retry</button>
+    </div>
+
+    <!-- Mounted React Component -->
+    <div ref="container" v-show="!loading && !error" style="width: 100%;"></div>
+  </div>
 </template>
 
 <script>
@@ -8,15 +25,103 @@ import { createRoot } from 'react-dom/client'
 
 export default {
   props: ['onLogin'],
-  data() { return { _root: null } },
+  data() {
+    return { 
+      _root: null, 
+      _Component: null,
+      loading: true,
+      error: false
+    }
+  },
   async mounted() {
-    const module = await import('react_signup/Signup')
-    const SignupComponent = module.default
-    this._root = createRoot(this.$refs.container)
-    this._root.render(React.createElement(SignupComponent, { onLogin: this.onLogin }))
+    await this.loadRemote()
+  },
+  methods: {
+    async loadRemote() {
+      this.loading = true
+      this.error = false
+      try {
+        const module = await import('react_signup/Signup')
+        this._Component = module.default
+        if (!this._root) {
+          this._root = createRoot(this.$refs.container)
+        }
+        this._render()
+        this.loading = false
+      } catch (err) {
+        console.error('Failed to load Signup remote:', err)
+        this.error = true
+        this.loading = false
+      }
+    },
+    retryLoad() {
+      this.loadRemote()
+    },
+    _render() {
+      if (this._root && this._Component) {
+        this._root.render(React.createElement(this._Component, { onLogin: this.onLogin }))
+      }
+    }
   },
   beforeUnmount() {
     if (this._root) this._root.unmount()
   }
 }
 </script>
+
+<style scoped>
+.signup-skeleton {
+  width: 100%;
+  max-width: 420px;
+  padding: 40px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.skeleton-title {
+  height: 30px;
+  width: 50%;
+  background: rgba(255,255,255,0.05);
+  margin: 0 auto 30px;
+  border-radius: 4px;
+  animation: pulse 1.5s infinite;
+}
+.skeleton-input {
+  height: 45px;
+  background: rgba(255,255,255,0.03);
+  margin-bottom: 20px;
+  border-radius: 8px;
+  animation: pulse 1.5s infinite 0.2s;
+}
+.skeleton-btn {
+  height: 45px;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 8px;
+  animation: pulse 1.5s infinite 0.4s;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.1; }
+  100% { opacity: 0.3; }
+}
+
+.error-block-compact {
+  padding: 30px;
+  background: rgba(239, 68, 68, 0.05);
+  border-radius: 16px;
+  color: #f87171;
+  text-align: center;
+}
+
+.retry-btn-small {
+  margin-top: 10px;
+  padding: 6px 20px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 13px;
+}
+</style>

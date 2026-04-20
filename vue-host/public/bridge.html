@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MFE Storage Bridge</title>
+</head>
+<body>
+    <script>
+        const channel = new BroadcastChannel('mfe-bus');
+
+        // Listen for broadcast from OTHER tabs and relay to THIS tab's parent
+        channel.onmessage = (event) => {
+            window.parent.postMessage({ type: 'BROADCAST_RECEIVE', ...event.data }, '*');
+        };
+
+        window.addEventListener('message', (event) => {
+            // Security: only accept messages from known origins
+            const allowedOrigins = [
+                'http://localhost:5173',
+                'http://localhost:5001',
+                'http://localhost:5002',
+                'http://localhost:5003',
+                'http://localhost:5004',
+            ];
+            if (!allowedOrigins.includes(event.origin)) return;
+
+            const { type, key, value, requestId } = event.data;
+
+            switch (type) {
+                case 'GET_ITEM': {
+                    const item = localStorage.getItem(key);
+                    event.source.postMessage({ type: 'RESPONSE', requestId, value: item }, event.origin);
+                    break;
+                }
+                case 'SET_ITEM': {
+                    localStorage.setItem(key, value);
+                    event.source.postMessage({ type: 'RESPONSE', requestId }, event.origin);
+                    break;
+                }
+                case 'REMOVE_ITEM': {
+                    localStorage.removeItem(key);
+                    event.source.postMessage({ type: 'RESPONSE', requestId }, event.origin);
+                    break;
+                }
+                case 'BROADCAST_SEND': {
+                    // Send to other tabs via BroadcastChannel
+                    channel.postMessage({ eventName: event.data.eventName, detail: event.data.detail });
+                    // Also notify the parent window of THIS tab immediately
+                    window.parent.postMessage({ type: 'BROADCAST_RECEIVE', eventName: event.data.eventName, detail: event.data.detail }, '*');
+                    break;
+                }
+            }
+        });
+
+        // FIX 1: Use a small delay to ensure the parent's message listener
+        // is registered BEFORE we fire the BRIDGE_READY handshake.
+        // The iframe's inline script runs before the parent's onload in some browsers.
+        setTimeout(() => {
+            window.parent.postMessage({ type: 'BRIDGE_READY' }, '*');
+            console.log('[Bridge] Handshake sent to parent.');
+        }, 50);
+    </script>
+</body>
+</html>

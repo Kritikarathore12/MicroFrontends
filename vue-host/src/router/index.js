@@ -4,6 +4,8 @@ import SignupWrapper from '../components/SignupWrapper.vue'
 import ProfileWrapper from '../components/ProfileWrapper.vue'
 import DashboardWrapper from '../components/DashboardWrapper.vue'
 
+import { bridge } from '../utils/bridge-client'
+
 const routes = [
   { path: '/', redirect: '/login' },
   { 
@@ -33,17 +35,19 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to, from) => {
-  const jwt = localStorage.getItem('jwt_token');
+router.beforeEach(async (to) => {
+  // Initialize bridge for every navigation if not already done
+  bridge.init();
+  
+  // Wait for the bridge to give us the current token
+  const jwt = await bridge.getItem('jwt_token');
 
   if (to.meta.requiresAuth && !jwt) {
-    // Needs authentication, but token is missing
     return '/login';
   } else if (to.meta.guestOnly && jwt) {
-    // Logged in users shouldn't see login/signup pages
     return '/dashboard';
   }
-  // Proceed normally (returning undefined/true both work)
 })
+
 
 export default router

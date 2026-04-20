@@ -1,11 +1,21 @@
+import React, { useState, useEffect } from 'react';
 import Profile from './Profile';
+import { bridge } from './utils/bridge-client';
 
 function App() {
-  return (
-    <div style={{ backgroundColor: '#0f172a', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <Profile />
-    </div>
-  )
+  const [token, setToken] = useState('');
+
+  useEffect(() => {
+    bridge.init();
+    const fetchToken = async () => {
+      const storedToken = await bridge.getItem('jwt_token');
+      setToken(storedToken || '');
+    };
+    fetchToken();
+  }, []);
+
+  return <Profile token={token} />;
 }
 
-export default App
+export default App;
+

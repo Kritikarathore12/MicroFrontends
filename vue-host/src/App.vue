@@ -1,50 +1,87 @@
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { bridge } from './utils/bridge-client'
 
 const router = useRouter()
-const route = useRoute()
-const jwtToken = ref(localStorage.getItem('jwt_token'))
+const jwtToken = ref(null)
 const reactMessage = ref('')
 const hostInput = ref('')
+const loading = ref(true) // Only for the initial session sync
+const notification = ref(null)
+let unsubscribeBroadcast = null
 
-// Watch for route changes to verify localStorage status (in case of manual deletion/addition)
-watch(() => route.path, () => {
-  jwtToken.value = localStorage.getItem('jwt_token')
+onMounted(async () => {
+  bridge.init()
+  // Initial one-time session check — this is the ONLY time we show the loader
+  const token = await bridge.getItem('jwt_token')
+  jwtToken.value = token
+  loading.value = false
+
+  // FIX 3: Store the unsubscribe function
+  unsubscribeBroadcast = bridge.onBroadcast((eventName, detail) => {
+    if (eventName === 'DashboardToHost') {
+      reactMessage.value = detail
+    } else if (eventName === 'GLOBAL_ALERT') {
+      showNotification(detail)
+    } else if (eventName === 'USER_LOGOUT') {
+      if (jwtToken.value) {
+        jwtToken.value = null
+        reactMessage.value = ''
+        router.push('/login')
+      }
+    } else if (eventName === 'NAVIGATE') {
+      // Fix 9: React MFEs can trigger Vue Router navigation (e.g. "Sign in" / "Sign up" links)
+      router.push(detail)
+    }
+  })
+
 })
 
-const handleLogin = (token) => {
+// FIX 3: Clean up listener when the component is destroyed
+onUnmounted(() => {
+  if (unsubscribeBroadcast) unsubscribeBroadcast()
+})
+
+const showNotification = (msg) => {
+  notification.value = msg
+  setTimeout(() => notification.value = null, 4000)
+}
+
+// FIX 6: No loading spinner for login/logout — only update state and navigate
+const handleLogin = async (token) => {
+  await bridge.setItem('jwt_token', token)
   jwtToken.value = token
   router.push('/dashboard')
 }
 
-const handleLogout = () => {
-  localStorage.removeItem('jwt_token')
+const handleLogout = async () => {
+  await bridge.removeItem('jwt_token')
+  bridge.broadcast('USER_LOGOUT', true)
   jwtToken.value = null
   reactMessage.value = ''
   router.push('/login')
 }
 
-// Bi-Directional Event Bus Logistics
-const handleDashMsg = (e) => reactMessage.value = e.detail
-
-onMounted(() => {
-  window.addEventListener('DashboardToHost', handleDashMsg)
-})
-onUnmounted(() => {
-  window.removeEventListener('DashboardToHost', handleDashMsg)
-})
-
 const sendToDashboard = () => {
-  if (!hostInput.value) return;
-  window.dispatchEvent(new CustomEvent('HostToDashboard', { detail: hostInput.value }))
+  if (!hostInput.value.trim()) return
+  bridge.broadcast('HostToDashboard', hostInput.value)
   hostInput.value = ''
 }
 </script>
 
+
+
 <template>
   <div style="background-color: #0b1020; min-height: 100vh; color: white; display: flex; flex-direction: column;">
     
+    <!-- Global Notification System -->
+    <transition name="fade">
+      <div v-if="notification" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #3b82f6; color: white; padding: 12px 24px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 1000; font-weight: 600; display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 20px;">🔔</span> {{ notification }}
+      </div>
+    </transition>
+
     <!-- Top Navigation -->
     <nav style="display: flex; align-items: center; justify-content: space-between; padding: 15px 40px; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 50;">
       
@@ -89,7 +126,11 @@ const sendToDashboard = () => {
 
     <!-- Main Content Area where Microfrontends mount -->
     <main style="flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 40px;">
-      <div style="width: 100%; max-width: 1200px;">
+      <div v-if="loading" style="display: flex; flex-direction: column; align-items: center; gap: 20px; margin-top: 100px; color: #94a3b8;">
+        <div class="loader"></div>
+        <p style="font-weight: 500; letter-spacing: 1px;">Synchronizing Session...</p>
+      </div>
+      <div v-else style="width: 100%; max-width: 1200px;">
         <router-view :onLogin="handleLogin" :token="jwtToken" />
       </div>
     </main>
@@ -98,6 +139,27 @@ const sendToDashboard = () => {
 </template>
 
 <style>
+.loader {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  border-top-color: #3b82f6;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -20px) !important;
+}
+
 /* Base modern styles */
 body {
   margin: 0;

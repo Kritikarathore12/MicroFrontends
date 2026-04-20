@@ -1,12 +1,10 @@
-import Login from './Login'
+import LoginForm from './components/loginForm'
 
 function App() {
-  return (
-    <div style={{ padding: '40px', background: '#0b1020', minHeight: '100vh' }}>
-      <h1 style={{ color: 'white', textAlign: 'center', marginBottom: '30px' }}>Standalone Login Preview</h1>
-      <Login />
-    </div>
-  )
+  const handleLogin = () => {
+    window.location.href = 'http://localhost:5173/dashboard'
+  }
+  return <LoginForm onLogin={handleLogin} />
 }
 
 export default App

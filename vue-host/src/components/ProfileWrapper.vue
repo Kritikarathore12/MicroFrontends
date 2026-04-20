@@ -1,5 +1,23 @@
 <template>
-  <div ref="container"></div>
+  <div style="width: 100%; min-height: 300px; position: relative;">
+    <!-- Skeleton Loader -->
+    <div v-if="loading" class="skeleton-container">
+      <div class="skeleton-header"></div>
+      <div class="skeleton-banner"></div>
+      <div class="skeleton-field" v-for="i in 2" :key="i"></div>
+    </div>
+
+    <!-- Error State -->
+    <div v-if="error" class="error-block">
+      <div style="font-size: 40px; margin-bottom: 15px;">🔌</div>
+      <h3>Micro-frontend Offline</h3>
+      <p>The Profile service is currently unavailable. Please ensure port 5003 is running.</p>
+      <button @click="retryLoad" class="retry-btn">Retry Connection</button>
+    </div>
+
+    <!-- Mounted React Component -->
+    <div ref="container" v-show="!loading && !error"></div>
+  </div>
 </template>
 
 <script>
@@ -9,18 +27,42 @@ import { createRoot } from 'react-dom/client'
 export default {
   props: ['token'],
   data() {
-    return { _root: null, _Component: null }
+    return { 
+      _root: null, 
+      _Component: null,
+      loading: true,
+      error: false
+    }
   },
   async mounted() {
-    const module = await import('react_profile/Profile')
-    this._Component = module.default
-    this._root = createRoot(this.$refs.container)
-    this._render()
+    await this.loadRemote()
   },
   watch: {
-    token() { this._render() }
+    token() {
+      this._render()
+    }
   },
   methods: {
+    async loadRemote() {
+      this.loading = true
+      this.error = false
+      try {
+        const module = await import('react_profile/Profile')
+        this._Component = module.default
+        if (!this._root) {
+          this._root = createRoot(this.$refs.container)
+        }
+        this._render()
+        this.loading = false
+      } catch (err) {
+        console.error('Failed to load Profile remote:', err)
+        this.error = true
+        this.loading = false
+      }
+    },
+    retryLoad() {
+      this.loadRemote()
+    },
     _render() {
       if (this._root && this._Component) {
         this._root.render(React.createElement(this._Component, { token: this.token }))
@@ -32,3 +74,64 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.skeleton-container {
+  padding: 40px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 24px;
+}
+.skeleton-header {
+  width: 250px;
+  height: 40px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  animation: pulse 1.5s infinite;
+}
+.skeleton-banner {
+  height: 60px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 12px;
+  margin-bottom: 30px;
+  animation: pulse 1.5s infinite 0.2s;
+}
+.skeleton-field {
+  height: 40px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  animation: pulse 1.5s infinite 0.4s;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.1; }
+  100% { opacity: 0.3; }
+}
+
+.error-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px dashed rgba(239, 68, 68, 0.3);
+  border-radius: 24px;
+  color: #f87171;
+  text-align: center;
+}
+
+.retry-btn {
+  margin-top: 20px;
+  padding: 10px 25px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+}
+</style>
+

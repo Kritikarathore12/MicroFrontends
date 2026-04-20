@@ -1,12 +1,12 @@
 import Signup from './Signup'
 
+// When used standalone (localhost:5002), redirect to Vue host after signup
+function handleLogin(token) {
+  window.location.href = 'http://localhost:5173/dashboard'
+}
+
 function App() {
-  return (
-    <div style={{ padding: '40px', background: '#0b1020', minHeight: '100vh', fontFamily: 'system-ui, sans-serif' }}>
-      <h1 style={{ color: 'white', textAlign: 'center', marginBottom: '30px' }}>Standalone Signup Preview</h1>
-      <Signup />
-    </div>
-  )
+  return <Signup onLogin={handleLogin} />
 }
 
 export default App
