@@ -1,6 +1,6 @@
 # =============================================
 # Micro-Frontend Full Startup Script
-# Run this from: React vue\ folder
+# Run from the project root (React vue/)
 # Usage: .\start-all.ps1
 # =============================================
 

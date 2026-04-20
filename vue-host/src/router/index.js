@@ -36,11 +36,8 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  // Initialize bridge for every navigation if not already done
-  bridge.init();
-  
-  // Wait for the bridge to give us the current token
-  const jwt = await bridge.getItem('jwt_token');
+  bridge.init()
+  const jwt = await bridge.getItem('jwt_token')
 
   if (to.meta.requiresAuth && !jwt) {
     return '/login';

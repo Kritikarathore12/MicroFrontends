@@ -7,18 +7,16 @@ const router = useRouter()
 const jwtToken = ref(null)
 const reactMessage = ref('')
 const hostInput = ref('')
-const loading = ref(true) // Only for the initial session sync
+const loading = ref(true)
 const notification = ref(null)
 let unsubscribeBroadcast = null
 
 onMounted(async () => {
   bridge.init()
-  // Initial one-time session check — this is the ONLY time we show the loader
   const token = await bridge.getItem('jwt_token')
   jwtToken.value = token
   loading.value = false
 
-  // FIX 3: Store the unsubscribe function
   unsubscribeBroadcast = bridge.onBroadcast((eventName, detail) => {
     if (eventName === 'DashboardToHost') {
       reactMessage.value = detail
@@ -31,14 +29,13 @@ onMounted(async () => {
         router.push('/login')
       }
     } else if (eventName === 'NAVIGATE') {
-      // Fix 9: React MFEs can trigger Vue Router navigation (e.g. "Sign in" / "Sign up" links)
       router.push(detail)
     }
   })
 
 })
 
-// FIX 3: Clean up listener when the component is destroyed
+// unsubscribe on unmount
 onUnmounted(() => {
   if (unsubscribeBroadcast) unsubscribeBroadcast()
 })
@@ -48,7 +45,7 @@ const showNotification = (msg) => {
   setTimeout(() => notification.value = null, 4000)
 }
 
-// FIX 6: No loading spinner for login/logout — only update state and navigate
+
 const handleLogin = async (token) => {
   await bridge.setItem('jwt_token', token)
   jwtToken.value = token

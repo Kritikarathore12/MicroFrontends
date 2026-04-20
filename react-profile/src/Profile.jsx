@@ -27,7 +27,7 @@ function Profile({ token }) {
       <h1 style={{ background: 'linear-gradient(to right, #4ade80, #3b82f6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: '32px', margin: '0 0 8px 0' }}>
         User Profile
       </h1>
-      <p style={{ color: '#64748b', marginBottom: '30px', fontSize: '14px' }}>React micro-frontend — port 5003</p>
+      <p style={{ color: '#64748b', marginBottom: '30px', fontSize: '14px' }}>Manage your account details</p>
 
       {token ? (
         <div>
