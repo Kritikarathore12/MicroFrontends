@@ -10,9 +10,6 @@ function LoginForm({ onLogin }) {
   const [errorMsg, setErrorMsg] = useState('')
   const [loading, setLoading]   = useState(false)
 
-  useEffect(() => {
-    eventBus.init()
-  }, [])
 
   // Validates credentials against the shared database and generates an auth token
   const handleSubmit = async (e) => {

@@ -11,9 +11,6 @@ function Signup({ onLogin }) {
   const [errorMsg, setErrorMsg] = useState('')
   const [loading, setLoading]   = useState(false)
 
-  useEffect(() => {
-    eventBus.init()
-  }, [])
 
   // Validates inputs, registers a new user in the shared database, and generates an auth token
   const handleSubmit = async (e) => {

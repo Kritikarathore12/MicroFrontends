@@ -4,6 +4,7 @@ import LoginWrapper from '../components/LoginWrapper.vue'
 import SignupWrapper from '../components/SignupWrapper.vue'
 import ProfileWrapper from '../components/ProfileWrapper.vue'
 import DashboardWrapper from '../components/DashboardWrapper.vue'
+import ChaitanyaWrapper from '../components/ChaitanyaWrapper.vue'
 
 import { eventBus } from '../utils/event-bus'
 
@@ -28,6 +29,10 @@ const routes = [
     path: '/dashboard', 
     component: DashboardWrapper,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/chaitanya',
+    component: ChaitanyaWrapper
   }
 ]
 
@@ -38,7 +43,6 @@ const router = createRouter({
 
 // Intercepts navigation to enforce route protection based on the user's authentication status
 router.beforeEach(async (to) => {
-  eventBus.init()
   
   let isAuthenticated = false
   try {

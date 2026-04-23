@@ -13,7 +13,6 @@ const notification = ref(null)
 let unsubscribeBroadcast = null
 
 onMounted(async () => {
-  eventBus.init()
   
   try {
     const res = await fetch('/api/auth/me')
@@ -133,7 +132,7 @@ const sendToDashboard = () => {
           <button @click="handleLogout" class="nav-btn-logout">Logout</button>
         </template>
 
-        <a href="https://chaitanya-kv.vercel.app/" class="nav-btn-external">Chaitanya</a>
+        <router-link to="/chaitanya" class="nav-btn-external">Chaitanya</router-link>
 
       </div>
     </nav>

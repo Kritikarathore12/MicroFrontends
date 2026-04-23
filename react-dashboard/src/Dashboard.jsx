@@ -31,7 +31,6 @@ export default function Dashboard({ token: initialToken }) {
   }, [initialToken])
 
   useEffect(() => {
-    eventBus.init()
     
     // Verify session via the backend
     fetch('/api/auth/me')

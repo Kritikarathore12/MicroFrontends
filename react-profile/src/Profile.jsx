@@ -8,7 +8,6 @@ function Profile() {
   const [token, setToken] = React.useState(null)
 
   useEffect(() => {
-    eventBus.init()
     
     // Verify session via the backend
     fetch('/api/auth/me')

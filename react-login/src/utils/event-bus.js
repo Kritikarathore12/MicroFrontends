@@ -8,10 +8,6 @@ window.addEventListener('MFE_BROADCAST', (event) => {
 })
 
 export const eventBus = {
-  init: () => {}, 
-  getItem: async (key) => localStorage.getItem(key),
-  setItem: async (key, value) => { localStorage.setItem(key, value) },
-  removeItem: async (key) => { localStorage.removeItem(key) },
 
   broadcast: (eventName, detail) => {
     window.dispatchEvent(new CustomEvent('MFE_BROADCAST', { 
