@@ -1,7 +1,8 @@
+<!-- FILE PURPOSE: Global layout of the Vue Host, containing the navigation bar and the mount point for micro-frontends. -->
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { bridge } from './utils/bridge-client'
+import { eventBus } from './utils/event-bus'
 
 const router = useRouter()
 const jwtToken = ref(null)
@@ -12,12 +13,12 @@ const notification = ref(null)
 let unsubscribeBroadcast = null
 
 onMounted(async () => {
-  bridge.init()
-  const token = await bridge.getItem('jwt_token')
+  eventBus.init()
+  const token = await eventBus.getItem('jwt_token')
   jwtToken.value = token
   loading.value = false
 
-  unsubscribeBroadcast = bridge.onBroadcast((eventName, detail) => {
+  unsubscribeBroadcast = eventBus.onBroadcast((eventName, detail) => {
     if (eventName === 'DashboardToHost') {
       reactMessage.value = detail
     } else if (eventName === 'GLOBAL_ALERT') {
@@ -40,29 +41,33 @@ onUnmounted(() => {
   if (unsubscribeBroadcast) unsubscribeBroadcast()
 })
 
+// Displays a temporary global notification toast at the top of the screen
 const showNotification = (msg) => {
   notification.value = msg
   setTimeout(() => notification.value = null, 4000)
 }
 
 
+// Saves the authentication token to the event bus and redirects to the dashboard
 const handleLogin = async (token) => {
-  await bridge.setItem('jwt_token', token)
+  await eventBus.setItem('jwt_token', token)
   jwtToken.value = token
   router.push('/dashboard')
 }
 
+// Clears the session token, broadcasts a logout event to all apps, and redirects to login
 const handleLogout = async () => {
-  await bridge.removeItem('jwt_token')
-  bridge.broadcast('USER_LOGOUT', true)
+  await eventBus.removeItem('jwt_token')
+  eventBus.broadcast('USER_LOGOUT', true)
   jwtToken.value = null
   reactMessage.value = ''
   router.push('/login')
 }
 
+// Broadcasts a text message from the Vue Host's navbar to the React Dashboard
 const sendToDashboard = () => {
   if (!hostInput.value.trim()) return
-  bridge.broadcast('HostToDashboard', hostInput.value)
+  eventBus.broadcast('HostToDashboard', hostInput.value)
   hostInput.value = ''
 }
 </script>
@@ -100,7 +105,7 @@ const sendToDashboard = () => {
         <!-- Authenticated Links (Logged In) -->
         <template v-else>
           <!-- Display message received from React -->
-          <div v-if="reactMessage" style="color: #cbd5e1; font-size: 13px; margin-right: 15px; max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: rgba(59, 130, 246, 0.1); padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);" title="Message from React Dashboard">
+          <div v-if="reactMessage" :title="reactMessage" style="color: #cbd5e1; font-size: 13px; margin-right: 15px; background: rgba(59, 130, 246, 0.1); padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);">
             <strong style="color: #60a5fa;">React:</strong> {{ reactMessage }}
           </div>
           
@@ -118,8 +123,12 @@ const sendToDashboard = () => {
           <button @click="handleLogout" class="nav-btn-logout">Logout</button>
         </template>
 
+        <a href="https://chaitanya-kv.vercel.app/" class="nav-btn-external">Chaitanya</a>
+
       </div>
     </nav>
+
+    
 
     <!-- Main Content Area where Microfrontends mount -->
     <main style="flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 40px;">
@@ -221,4 +230,24 @@ body {
 .nav-btn-action:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+
+/* External Link Button */
+.nav-btn-external {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+.nav-btn-external:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(16, 185, 129, 0.5);
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
 </style>

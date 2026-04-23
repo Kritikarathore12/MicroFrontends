@@ -1,3 +1,4 @@
+<!-- FILE PURPOSE: A Vue wrapper specifically designed to fetch and display the React Profile micro-frontend. -->
 <template>
   <div style="width: 100%; min-height: 300px; position: relative;">
     <!-- Skeleton Loader -->
@@ -43,6 +44,7 @@ export default {
     }
   },
   methods: {
+    // Asynchronously fetches the React remote component and injects it into the Vue DOM
     async loadRemote() {
       this.loading = true
       this.error = false

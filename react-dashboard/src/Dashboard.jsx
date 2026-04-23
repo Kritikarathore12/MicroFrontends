@@ -1,5 +1,6 @@
+// FILE PURPOSE: The core React UI and bidirectional messaging logic for the Dashboard screen.
 import React, { useState, useEffect } from 'react'
-import { bridge } from './utils/bridge-client'
+import { eventBus } from './utils/event-bus'
 
 const cardStyle = {
   padding: '24px',
@@ -28,20 +29,21 @@ export default function Dashboard({ token: initialToken }) {
   }, [initialToken])
 
   useEffect(() => {
-    bridge.init()
+    eventBus.init()
     if (!initialToken) {
-      bridge.getItem('jwt_token').then(t => { if (t) setToken(t) })
+      eventBus.getItem('jwt_token').then(t => { if (t) setToken(t) })
     }
-    const unsubscribe = bridge.onBroadcast((eventName, detail) => {
+    const unsubscribe = eventBus.onBroadcast((eventName, detail) => {
       if (eventName === 'HostToDashboard') setVueMessage(detail)
       if (eventName === 'USER_LOGOUT' && !initialToken) setToken(null)
     })
     return () => unsubscribe()
   }, [])
 
+  // Sends a custom text message to the Vue Host via the event bus
   const sendToHost = () => {
     if (!inputMsg.trim()) return
-    bridge.broadcast('DashboardToHost', inputMsg)
+    eventBus.broadcast('DashboardToHost', inputMsg)
     setInputMsg('')
   }
 
@@ -66,7 +68,7 @@ export default function Dashboard({ token: initialToken }) {
           <strong>✅ Authenticated session active</strong>
         </div>
         <button
-          onClick={() => bridge.broadcast('GLOBAL_ALERT', 'Dashboard says: Hello from React! 🚀')}
+          onClick={() => eventBus.broadcast('GLOBAL_ALERT', 'Dashboard says: Hello from React! 🚀')}
           style={{ marginLeft: '15px', padding: '12px 20px', background: '#a855f7', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '700', boxShadow: '0 4px 15px rgba(168,85,247,0.4)' }}
         >
           🚀 Trigger Host Alert

@@ -1,5 +1,6 @@
+// FILE PURPOSE: The core React UI and authentication logic for the Login screen.
 import React, { useState, useEffect } from 'react'
-import { bridge } from '../utils/bridge-client'
+import { eventBus } from '../utils/event-bus'
 
 function LoginForm({ onLogin }) {
   const [email, setEmail]       = useState('')
@@ -8,9 +9,10 @@ function LoginForm({ onLogin }) {
   const [loading, setLoading]   = useState(false)
 
   useEffect(() => {
-    bridge.init()
+    eventBus.init()
   }, [])
 
+  // Validates credentials against the shared database and generates an auth token
   const handleSubmit = async (e) => {
     e.preventDefault()
     setErrorMsg('')
@@ -21,7 +23,7 @@ function LoginForm({ onLogin }) {
     }
 
     setLoading(true)
-    const usersStr = await bridge.getItem('usersDB')
+    const usersStr = await eventBus.getItem('usersDB')
     const users    = JSON.parse(usersStr || '[]')
     const user     = users.find(u => u.email === email)
     setLoading(false)
@@ -36,7 +38,7 @@ function LoginForm({ onLogin }) {
     }
 
     const token = 'jwt.' + btoa(JSON.stringify({ email: user.email, name: user.name })) + '.' + Date.now()
-    await bridge.setItem('jwt_token', token)
+    await eventBus.setItem('jwt_token', token)
     if (onLogin) onLogin(token)
   }
 
@@ -81,7 +83,7 @@ function LoginForm({ onLogin }) {
 
         <p style={{ textAlign: 'center', color: '#64748b', marginTop: '20px', fontSize: '13px' }}>
           Don't have an account?{' '}
-          <span style={{ color: '#60a5fa', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => bridge.broadcast('NAVIGATE', '/signup')}>
+          <span style={{ color: '#60a5fa', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => eventBus.broadcast('NAVIGATE', '/signup')}>
             Sign up
           </span>
         </p>

@@ -1,10 +1,11 @@
+// FILE PURPOSE: Configures URLs and manages access control (e.g., kicking logged-out users back to login).
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginWrapper from '../components/LoginWrapper.vue'
 import SignupWrapper from '../components/SignupWrapper.vue'
 import ProfileWrapper from '../components/ProfileWrapper.vue'
 import DashboardWrapper from '../components/DashboardWrapper.vue'
 
-import { bridge } from '../utils/bridge-client'
+import { eventBus } from '../utils/event-bus'
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -35,9 +36,10 @@ const router = createRouter({
   routes,
 })
 
+// Intercepts navigation to enforce route protection based on the user's authentication status
 router.beforeEach(async (to) => {
-  bridge.init()
-  const jwt = await bridge.getItem('jwt_token')
+  eventBus.init()
+  const jwt = await eventBus.getItem('jwt_token')
 
   if (to.meta.requiresAuth && !jwt) {
     return '/login';

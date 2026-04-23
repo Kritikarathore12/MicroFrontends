@@ -1,3 +1,4 @@
+<!-- FILE PURPOSE: A Vue wrapper specifically designed to fetch and display the React Signup micro-frontend. -->
 <template>
   <div style="width: 100%; min-height: 450px; position: relative; display: flex; justify-content: center; align-items: center;">
     <!-- Skeleton Loader -->
@@ -37,6 +38,7 @@ export default {
     await this.loadRemote()
   },
   methods: {
+    // Asynchronously fetches the React remote component and injects it into the Vue DOM
     async loadRemote() {
       this.loading = true
       this.error = false

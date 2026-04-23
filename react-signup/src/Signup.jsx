@@ -1,5 +1,6 @@
+// FILE PURPOSE: The core React UI and registration logic for the Signup screen.
 import React, { useState, useEffect } from 'react'
-import { bridge } from './utils/bridge-client'
+import { eventBus } from './utils/event-bus'
 
 function Signup({ onLogin }) {
   const [name, setName]         = useState('')
@@ -9,9 +10,10 @@ function Signup({ onLogin }) {
   const [loading, setLoading]   = useState(false)
 
   useEffect(() => {
-    bridge.init()
+    eventBus.init()
   }, [])
 
+  // Validates inputs, registers a new user in the shared database, and generates an auth token
   const handleSubmit = async (e) => {
     e.preventDefault()
     setErrorMsg('')
@@ -26,7 +28,7 @@ function Signup({ onLogin }) {
     }
 
     setLoading(true)
-    const usersStr = await bridge.getItem('usersDB')
+    const usersStr = await eventBus.getItem('usersDB')
     const users    = JSON.parse(usersStr || '[]')
 
     if (users.find(u => u.email === email)) {
@@ -36,10 +38,10 @@ function Signup({ onLogin }) {
     }
 
     users.push({ name, email, password })
-    await bridge.setItem('usersDB', JSON.stringify(users))
+    await eventBus.setItem('usersDB', JSON.stringify(users))
 
     const token = 'jwt.' + btoa(JSON.stringify({ email, name })) + '.' + Date.now()
-    await bridge.setItem('jwt_token', token)
+    await eventBus.setItem('jwt_token', token)
     setLoading(false)
 
     if (onLogin) onLogin(token)
@@ -89,7 +91,7 @@ function Signup({ onLogin }) {
 
         <p style={{ textAlign: 'center', color: '#64748b', marginTop: '20px', fontSize: '13px' }}>
           Already have an account?{' '}
-          <span style={{ color: '#60a5fa', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => bridge.broadcast('NAVIGATE', '/login')}>
+          <span style={{ color: '#60a5fa', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => eventBus.broadcast('NAVIGATE', '/login')}>
             Sign in
           </span>
         </p>

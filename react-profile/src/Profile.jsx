@@ -1,10 +1,12 @@
+// FILE PURPOSE: The core React UI for displaying user details on the Profile screen.
 import React, { useEffect } from 'react'
-import { bridge } from './utils/bridge-client'
+import { eventBus } from './utils/event-bus'
 
+// Decodes the JWT token to display the user's avatar, name, and email details
 function Profile({ token }) {
   useEffect(() => {
-    bridge.init()
-    const unsubscribe = bridge.onBroadcast((eventName) => {
+    eventBus.init()
+    const unsubscribe = eventBus.onBroadcast((eventName) => {
       if (eventName === 'USER_LOGOUT') window.location.reload()
     })
     return () => unsubscribe()

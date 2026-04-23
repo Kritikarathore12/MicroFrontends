@@ -1,14 +1,16 @@
+// FILE PURPOSE: Standalone React root component. ONLY used for local testing. Ignored by Vue Host.
+// Root React component used ONLY when running this micro-frontend standalone (npm run dev)
 import React, { useState, useEffect } from 'react';
 import Dashboard from './Dashboard';
-import { bridge } from './utils/bridge-client';
+import { eventBus } from './utils/event-bus';
 
 export default function App() {
   const [token, setToken] = useState('');
 
   useEffect(() => {
-    bridge.init();
+    eventBus.init();
     const fetchToken = async () => {
-      const storedToken = await bridge.getItem('jwt_token');
+      const storedToken = await eventBus.getItem('jwt_token');
       setToken(storedToken || '');
     };
     fetchToken();
