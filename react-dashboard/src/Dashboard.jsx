@@ -32,12 +32,22 @@ export default function Dashboard({ token: initialToken }) {
 
   useEffect(() => {
     eventBus.init()
-    if (!initialToken) {
-      eventBus.getItem('jwt_token').then(t => { if (t) setToken(t) })
-    }
+    
+    // Verify session via the backend
+    fetch('/api/auth/me')
+      .then(res => res.json())
+      .then(data => {
+        if (data.user) {
+          setToken('cookie_session_active')
+        } else {
+          setToken(null)
+        }
+      })
+      .catch(() => setToken(null))
+
     const unsubscribe = eventBus.onBroadcast((eventName, detail) => {
       if (eventName === 'HostToDashboard') setVueMessage(detail)
-      if (eventName === 'USER_LOGOUT' && !initialToken) setToken(null)
+      if (eventName === 'USER_LOGOUT') setToken(null)
     })
     return () => unsubscribe()
   }, [])

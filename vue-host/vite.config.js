@@ -15,11 +15,12 @@ export default defineConfig(({ mode }) => {
           react_signup:   `${env.VITE_SIGNUP_URL}/assets/remoteEntry.js`,
           react_profile:  `${env.VITE_PROFILE_URL}/assets/remoteEntry.js`,
           react_dashboard:`${env.VITE_DASHBOARD_URL}/assets/remoteEntry.js`,
+          react_shared_ui:`${env.VITE_SHARED_UI_URL}/assets/remoteEntry.js`,
         },
       shared: {
         'vue':       { singleton: true, requiredVersion: false },
-        'react': { singleton: true, requiredVersion: '^19.2.4', strictVersion: true },
-        'react-dom': { singleton: true, requiredVersion: '^19.2.4', strictVersion: true },
+        'react': { singleton: true, requiredVersion: false },
+        'react-dom': { singleton: true, requiredVersion: false },
       },
     }),
   ],
@@ -31,13 +32,27 @@ export default defineConfig(({ mode }) => {
   server: {
     port: 5173,
     cors: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
+      }
+    }
   },
   preview: {
     port: 5173,
+    strictPort: true,
     cors: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
+      }
+    }
   },
   build: {
     target: 'esnext',
+    cssCodeSplit: false
   },
   }
 })

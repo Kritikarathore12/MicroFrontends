@@ -13,13 +13,14 @@ export default defineConfig({
         './Input': './src/components/Input.jsx',
       },
       shared: {
-        'react': { singleton: true, requiredVersion: '^19.2.4', strictVersion: true },
-        'react-dom': { singleton: true, requiredVersion: '^19.2.4', strictVersion: true },
+        'react': { singleton: true, requiredVersion: false },
+        'react-dom': { singleton: true, requiredVersion: false },
       }
     })
   ],
   build: {
-    target: 'esnext'
+    target: 'esnext',
+    cssCodeSplit: false
   },
   server: { port: 5005, cors: true },
   preview: {

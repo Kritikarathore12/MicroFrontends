@@ -3,26 +3,33 @@ import React, { useEffect } from 'react'
 import { eventBus } from './utils/event-bus'
 
 // Decodes the JWT token to display the user's avatar, name, and email details
-function Profile({ token }) {
+function Profile() {
+  const [userInfo, setUserInfo] = React.useState(null)
+  const [token, setToken] = React.useState(null)
+
   useEffect(() => {
     eventBus.init()
-    const unsubscribe = eventBus.onBroadcast((eventName) => {
-      if (eventName === 'USER_LOGOUT') window.location.reload()
-    })
+    
+    // Verify session via the backend
+    fetch('/api/auth/me')
+      .then(res => res.json())
+      .then(data => {
+        if (data.user) {
+          setToken('cookie_session_active')
+          setUserInfo(data.user)
+        } else {
+          setToken(null)
+          setUserInfo(null)
+        }
+      })
+      .catch(() => {
+        setToken(null)
+        setUserInfo(null)
+      })
+
+    const unsubscribe = eventBus.onBroadcast(() => {})
     return () => unsubscribe()
   }, [])
-
-  let userInfo = null
-  if (token) {
-    const parts = token.split('.')
-    for (const idx of [1, 2]) {
-      if (!parts[idx]) continue
-      try {
-        const decoded = JSON.parse(atob(parts[idx]))
-        if (decoded?.name || decoded?.email) { userInfo = decoded; break }
-      } catch { /* skip */ }
-    }
-  }
 
   return (
     <div style={{ padding: '40px', background: 'rgba(255,255,255,0.05)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)', fontFamily: 'system-ui, sans-serif', color: 'white' }}>

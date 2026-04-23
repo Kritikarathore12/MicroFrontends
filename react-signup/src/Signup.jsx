@@ -30,23 +30,26 @@ function Signup({ onLogin }) {
     }
 
     setLoading(true)
-    const usersStr = await eventBus.getItem('usersDB')
-    const users    = JSON.parse(usersStr || '[]')
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+      })
+      const data = await response.json()
 
-    if (users.find(u => u.email === email)) {
+      if (!response.ok) {
+        throw new Error(data.error || 'Registration failed')
+      }
+
+      // Backend automatically sets the HttpOnly cookie for session!
+      // We no longer need to save the token in localStorage.
+      if (onLogin) onLogin('cookie_session_active')
+    } catch (err) {
+      setErrorMsg(err.message)
+    } finally {
       setLoading(false)
-      setErrorMsg('Email already registered. Please sign in.')
-      return
     }
-
-    users.push({ name, email, password })
-    await eventBus.setItem('usersDB', JSON.stringify(users))
-
-    const token = 'jwt.' + btoa(JSON.stringify({ email, name })) + '.' + Date.now()
-    await eventBus.setItem('jwt_token', token)
-    setLoading(false)
-
-    if (onLogin) onLogin(token)
   }
 
   const inputStyle = { marginBottom: '16px' }

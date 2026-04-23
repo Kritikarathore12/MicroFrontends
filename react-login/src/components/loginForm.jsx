@@ -25,23 +25,25 @@ function LoginForm({ onLogin }) {
     }
 
     setLoading(true)
-    const usersStr = await eventBus.getItem('usersDB')
-    const users    = JSON.parse(usersStr || '[]')
-    const user     = users.find(u => u.email === email)
-    setLoading(false)
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+      const data = await response.json()
 
-    if (!user) {
-      setErrorMsg('No account found. Please sign up first.')
-      return
-    }
-    if (user.password !== password) {
-      setErrorMsg('Incorrect password.')
-      return
-    }
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed')
+      }
 
-    const token = 'jwt.' + btoa(JSON.stringify({ email: user.email, name: user.name })) + '.' + Date.now()
-    await eventBus.setItem('jwt_token', token)
-    if (onLogin) onLogin(token)
+      // Backend automatically sets the HttpOnly cookie for session!
+      if (onLogin) onLogin('cookie_session_active')
+    } catch (err) {
+      setErrorMsg(err.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const inputStyle = { marginBottom: '16px' }

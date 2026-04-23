@@ -37,12 +37,12 @@ export default function Button({ children, onClick, variant = 'primary', style =
       onClick={onClick} 
       style={combinedStyle}
       onMouseOver={(e) => {
-        if (variant === 'primary') e.target.style.boxShadow = '0 10px 15px -3px rgba(59, 130, 246, 0.5)';
-        e.target.style.transform = 'translateY(-2px)';
+        if (variant === 'primary') e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(59, 130, 246, 0.5)';
+        e.currentTarget.style.transform = 'translateY(-2px)';
       }}
       onMouseOut={(e) => {
-        e.target.style.boxShadow = baseStyle.boxShadow;
-        e.target.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = baseStyle.boxShadow;
+        e.currentTarget.style.transform = 'translateY(0)';
       }}
       {...props}
     >

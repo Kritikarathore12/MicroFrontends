@@ -14,8 +14,18 @@ let unsubscribeBroadcast = null
 
 onMounted(async () => {
   eventBus.init()
-  const token = await eventBus.getItem('jwt_token')
-  jwtToken.value = token
+  
+  try {
+    const res = await fetch('/api/auth/me')
+    const data = await res.json()
+    if (data.user) {
+      jwtToken.value = 'cookie_session_active'
+    } else {
+      jwtToken.value = null
+    }
+  } catch (err) {
+    jwtToken.value = null
+  }
   loading.value = false
 
   unsubscribeBroadcast = eventBus.onBroadcast((eventName, detail) => {
@@ -50,14 +60,14 @@ const showNotification = (msg) => {
 
 // Saves the authentication token to the event bus and redirects to the dashboard
 const handleLogin = async (token) => {
-  await eventBus.setItem('jwt_token', token)
-  jwtToken.value = token
+  // Backend automatically set the cookie!
+  jwtToken.value = 'cookie_session_active'
   router.push('/dashboard')
 }
 
 // Clears the session token, broadcasts a logout event to all apps, and redirects to login
 const handleLogout = async () => {
-  await eventBus.removeItem('jwt_token')
+  await fetch('/api/auth/logout', { method: 'POST' })
   eventBus.broadcast('USER_LOGOUT', true)
   jwtToken.value = null
   reactMessage.value = ''

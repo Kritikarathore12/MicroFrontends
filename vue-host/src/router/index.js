@@ -39,11 +39,19 @@ const router = createRouter({
 // Intercepts navigation to enforce route protection based on the user's authentication status
 router.beforeEach(async (to) => {
   eventBus.init()
-  const jwt = await eventBus.getItem('jwt_token')
+  
+  let isAuthenticated = false
+  try {
+    const res = await fetch('/api/auth/me')
+    const data = await res.json()
+    if (data.user) isAuthenticated = true
+  } catch (err) {
+    isAuthenticated = false
+  }
 
-  if (to.meta.requiresAuth && !jwt) {
+  if (to.meta.requiresAuth && !isAuthenticated) {
     return '/login';
-  } else if (to.meta.guestOnly && jwt) {
+  } else if (to.meta.guestOnly && isAuthenticated) {
     return '/dashboard';
   }
 })

@@ -15,20 +15,35 @@ export default defineConfig({
         react_shared_ui: 'http://localhost:5005/assets/remoteEntry.js',
       },
       shared: {
-        'react': { singleton: true, requiredVersion: '^19.2.4', strictVersion: true },
-        'react-dom': { singleton: true, requiredVersion: '^19.2.4', strictVersion: true },
+        'react': { singleton: true, requiredVersion: false },
+        'react-dom': { singleton: true, requiredVersion: false },
       },
     }),
   ],
   build: {
     target: 'esnext',
+    cssCodeSplit: false
   },
   server: {
     port: 5001,
+    strictPort: true,
     cors: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
+      }
+    }
   },
   preview: {
     port: 5001,
+    strictPort: true,
     cors: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true
+      }
+    }
   },
 })

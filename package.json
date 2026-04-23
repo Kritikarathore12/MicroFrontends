@@ -3,11 +3,12 @@
   "private": true,
   "workspaces": [
     "vue-host",
-    "react-*",
-    "react-shared-ui"
+    "auth-api",
+    "react-*"
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev:*\"",
+    "dev:backend": "node auth-api/server.js",
     "dev:login": "npm --prefix react-login run dev",
     "dev:signup": "npm --prefix react-signup run dev",
     "dev:profile": "npm --prefix react-profile run dev",
@@ -22,6 +23,7 @@
     "build:dashboard": "npm --prefix react-dashboard run build",
     "build:shared": "npm --prefix react-shared-ui run build",
     "build:host": "npm --prefix vue-host run build",
+    "start": "concurrently \"node auth-api/server.js\" \"npm run preview\"",
     "preview": "concurrently \"npm run preview:*\"",
     "preview:login": "npm --prefix react-login run preview",
     "preview:signup": "npm --prefix react-signup run preview",
@@ -31,9 +33,12 @@
     "preview:host": "npm --prefix vue-host run preview"
   },
   "devDependencies": {
+    "@originjs/vite-plugin-federation": "^1.4.1",
     "concurrently": "^9.1.2"
   },
   "dependencies": {
-    "@originjs/vite-plugin-federation": "^1.4.1"
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "http-proxy-middleware": "^3.0.5"
   }
 }
