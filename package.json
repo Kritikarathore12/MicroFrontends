@@ -15,7 +15,7 @@
     "dev:dashboard": "npm --prefix react-dashboard run dev",
     "dev:shared": "npm --prefix react-shared-ui run dev",
     "dev:host": "npm --prefix vue-host run dev",
-    "build": "npm run build:remotes && npm run build:host",
+    "build": "npm run build:remotes && node patch-vite.js && npm run build:host",
     "build:remotes": "concurrently \"npm run build:login\" \"npm run build:signup\" \"npm run build:profile\" \"npm run build:dashboard\" \"npm run build:shared\"",
     "build:login": "npm --prefix react-login run build",
     "build:signup": "npm --prefix react-signup run build",
