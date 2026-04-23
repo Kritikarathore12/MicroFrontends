@@ -38,21 +38,28 @@ export default {
   },
   methods: {
     // Asynchronously fetches the React remote component and injects it into the Vue DOM
-    async loadRemote() {
+    async loadRemote(retries = 3, delay = 1000) {
       this.loading = true
       this.error = false
-      try {
-        const module = await import('react_login/Login')
-        this._Component = module.default
-        if (!this._root) {
-          this._root = createRoot(this.$refs.container)
+      for (let i = 0; i < retries; i++) {
+        try {
+          const module = await import('react_login/Login')
+          this._Component = module.default
+          if (!this._root) {
+            this._root = createRoot(this.$refs.container)
+          }
+          this._render()
+          this.loading = false
+          return
+        } catch (err) {
+          if (i === retries - 1) {
+            console.error('Failed to load Login remote:', err)
+            this.error = true
+            this.loading = false
+          } else {
+            await new Promise(r => setTimeout(r, delay * Math.pow(2, i)))
+          }
         }
-        this._render()
-        this.loading = false
-      } catch (err) {
-        console.error('Failed to load Login remote:', err)
-        this.error = true
-        this.loading = false
       }
     },
     retryLoad() {

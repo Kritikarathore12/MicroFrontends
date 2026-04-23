@@ -6,13 +6,11 @@ export default defineConfig({
   plugins: [
     react(),
     federation({
-      name: 'react_dashboard',
+      name: 'react_shared_ui',
       filename: 'remoteEntry.js',
       exposes: {
-        './Dashboard': './src/Dashboard.jsx',
-      },
-      remotes: {
-        react_shared_ui: 'http://localhost:5005/assets/remoteEntry.js',
+        './Button': './src/components/Button.jsx',
+        './Input': './src/components/Input.jsx',
       },
       shared: {
         'react': { singleton: true, requiredVersion: '^19.2.4', strictVersion: true },
@@ -23,9 +21,9 @@ export default defineConfig({
   build: {
     target: 'esnext'
   },
-  server: { port: 5004, cors: true },
+  server: { port: 5005, cors: true },
   preview: {
-    port: 5004,
+    port: 5005,
     strictPort: true,
     cors: true
   }

@@ -1,6 +1,8 @@
 // FILE PURPOSE: The core React UI and authentication logic for the Login screen.
 import React, { useState, useEffect } from 'react'
 import { eventBus } from '../utils/event-bus'
+import Button from 'react_shared_ui/Button'
+import Input from 'react_shared_ui/Input'
 
 function LoginForm({ onLogin }) {
   const [email, setEmail]       = useState('')
@@ -42,12 +44,7 @@ function LoginForm({ onLogin }) {
     if (onLogin) onLogin(token)
   }
 
-  const inputStyle = {
-    width: '100%', padding: '12px', borderRadius: '8px',
-    border: '1px solid #334155', background: '#0f172a',
-    color: 'white', fontSize: '14px', boxSizing: 'border-box',
-    outline: 'none', marginBottom: '16px',
-  }
+  const inputStyle = { marginBottom: '16px' }
   const labelStyle = {
     color: '#94a3b8', fontSize: '13px', fontWeight: '500',
     display: 'block', marginBottom: '6px',
@@ -67,18 +64,18 @@ function LoginForm({ onLogin }) {
 
         <form onSubmit={handleSubmit}>
           <label style={labelStyle}>Email</label>
-          <input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} />
+          <Input type="email" placeholder="you@example.com" value={email} onChange={e => setEmail(e.target.value)} style={inputStyle} />
 
           <label style={labelStyle}>Password</label>
-          <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} style={{ ...inputStyle, marginBottom: '24px' }} />
+          <Input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} style={{ marginBottom: '24px' }} />
 
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            style={{ width: '100%', padding: '13px', background: loading ? '#1e3a5f' : 'linear-gradient(135deg, #3b82f6, #2563eb)', color: 'white', border: 'none', cursor: loading ? 'wait' : 'pointer', borderRadius: '8px', fontWeight: '600', fontSize: '15px', transition: 'opacity 0.2s' }}
+            style={{ width: '100%' }}
           >
             {loading ? 'Signing in...' : 'Sign In'}
-          </button>
+          </Button>
         </form>
 
         <p style={{ textAlign: 'center', color: '#64748b', marginTop: '20px', fontSize: '13px' }}>

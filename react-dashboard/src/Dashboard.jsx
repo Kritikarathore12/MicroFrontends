@@ -1,6 +1,8 @@
 // FILE PURPOSE: The core React UI and bidirectional messaging logic for the Dashboard screen.
 import React, { useState, useEffect } from 'react'
 import { eventBus } from './utils/event-bus'
+import Button from 'react_shared_ui/Button'
+import Input from 'react_shared_ui/Input'
 
 const cardStyle = {
   padding: '24px',
@@ -67,12 +69,12 @@ export default function Dashboard({ token: initialToken }) {
         <div style={{ padding: '12px', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', color: '#4ade80', borderRadius: '8px', flex: 1 }}>
           <strong>✅ Authenticated session active</strong>
         </div>
-        <button
+        <Button
           onClick={() => eventBus.broadcast('GLOBAL_ALERT', 'Dashboard says: Hello from React! 🚀')}
-          style={{ marginLeft: '15px', padding: '12px 20px', background: '#a855f7', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '700', boxShadow: '0 4px 15px rgba(168,85,247,0.4)' }}
+          style={{ marginLeft: '15px' }}
         >
           🚀 Trigger Host Alert
-        </button>
+        </Button>
       </div>
 
       <div style={{ padding: '24px', background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: '16px', marginBottom: '32px' }}>
@@ -81,20 +83,19 @@ export default function Dashboard({ token: initialToken }) {
           Vue Host says: <strong style={{ color: 'white', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px' }}>{vueMessage || 'No message yet...'}</strong>
         </p>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <input
-            type="text"
+          <Input
             value={inputMsg}
             onChange={e => setInputMsg(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && sendToHost()}
             placeholder="Type a message for the Vue Host..."
-            style={{ flex: 1, padding: '10px 15px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(0,0,0,0.2)', color: 'white', fontSize: '14px', outline: 'none' }}
+            style={{ flex: 1 }}
           />
-          <button
+          <Button
             onClick={sendToHost}
-            style={{ padding: '10px 20px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '14px', whiteSpace: 'nowrap' }}
+            variant="primary"
           >
             Send to Vue
-          </button>
+          </Button>
         </div>
       </div>
 
