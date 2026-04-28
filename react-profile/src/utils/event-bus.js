@@ -4,7 +4,7 @@ const listeners = new Set()
 
 window.addEventListener('MFE_BROADCAST', (event) => {
   const { eventName, detail } = event.detail
-  listeners.forEach(cb => cb(eventName, detail))
+  (Array.isArray(listeners)?listeners:[listeners]).forEach(cb => cb(eventName, detail))
 })
 
 export const eventBus = {
